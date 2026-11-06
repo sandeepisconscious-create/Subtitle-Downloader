@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Subtitle Downloader</title>
+  <link rel="stylesheet" href="src/popup/popup.css">
+</head>
+<body data-theme="dark">
+  <!-- Header -->
+  <div class="header">
+    <div class="brand">
+      <img src="icon.png" alt="Logo" class="brand-logo">
+      <span>Subtitle Downloader</span>
+    </div>
+    <div class="header-right">
+      <button class="icon-btn" id="btnSettings" title="Settings" aria-label="Settings">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Context-Aware View -->
+  <div id="mainView">
+    <!-- VIEW 1: Playlist / Video Captions -->
+    <div class="site-view" id="view-playlist">
+      <div class="card">
+        <div class="media-header">
+          <div class="media-meta">
+            <div class="pill-tag" id="plPill">SUBTITLES AVAILABLE</div>
+            <div class="media-title" id="plTitle">Scanning page...</div>
+          </div>
+          <button class="icon-btn" id="btnPlScan" title="Re-scan page" aria-label="Re-scan page">
+            <svg viewBox="0 0 24 24">
+              <path d="M21 12a9 9 0 1 1-2.64-6.36"></path>
+              <polyline points="21 3 21 9 15 9"></polyline>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Destination & Optional Custom Prefix (Hidden while downloading) -->
+        <div id="plConfigSection" class="config-stack">
+          <div class="field-group">
+            <span class="field-label">File Naming</span>
+            <div class="seg-group seg-group-full" id="plNamingGroup">
+              <button type="button" class="seg-opt pl-naming-opt active" data-pl-naming="title">Video Title</button>
+              <button type="button" class="seg-opt pl-naming-opt" data-pl-naming="prefix">Custom Name</button>
+            </div>
+            <div class="field-item" id="plPrefixRow" style="display:none;">
+              <input id="plPrefix" class="field-input" type="text" placeholder="Enter custom file or folder name">
+            </div>
+          </div>
+
+          <div class="dest-badge">
+            <svg class="dest-icon" viewBox="0 0 24 24">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span class="dest-path" id="plDestText">Subtitles/</span>
+          </div>
+
+          <div class="option-row" id="plLangRow" style="display:none;">
+            <label for="plLangSelect" class="field-label">Video Language</label>
+            <select id="plLangSelect" class="compact-select" aria-label="Video Language"></select>
+          </div>
+
+          <div class="option-row" id="plRangeRow" style="display:none;">
+            <span class="field-label">Download Videos</span>
+            <div class="range-inputs">
+              <input id="plRangeStart" class="compact-input range-num" type="number" min="1" value="1" aria-label="Start video number">
+              <span class="range-sep">to</span>
+              <input id="plRangeEnd" class="compact-input range-num" type="number" min="1" value="1" aria-label="End video number">
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress / Completion Box (Only shown during or after download) -->
+        <div class="state-box" id="plStateBox">
+          <div class="state-top">
+            <span id="plCountText">Downloading...</span>
+            <span id="plPctText">0%</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" id="plBarFill"></div>
+          </div>
+          <div class="state-sub" id="plStatusMessage"></div>
+          <div class="missing-banner" id="plMissing"></div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+          <button class="primary-btn" id="btnPlStart">Download Transcript</button>
+          <button class="secondary-btn" id="btnPlCopy">Copy Transcript to Clipboard</button>
+          <button class="secondary-btn" id="btnPlSingle" style="display:none;">Download Current Video Only</button>
+          <button class="secondary-btn" id="btnPlReset" style="display:none;">Start Over</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 2: Episodic Season Page -->
+    <div class="site-view" id="view-season">
+      <div class="card">
+        <div class="media-header">
+          <div class="media-meta">
+            <div class="pill-tag" id="seasonPill">SUBTITLES AVAILABLE</div>
+            <div class="media-title" id="seasonTitle">Season Episodes</div>
+          </div>
+          <button class="icon-btn" id="btnScan" title="Scan episode list" aria-label="Scan episode list">
+            <svg viewBox="0 0 24 24">
+              <path d="M21 12a9 9 0 1 1-2.64-6.36"></path>
+              <polyline points="21 3 21 9 15 9"></polyline>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Config inputs (Hidden while downloading) -->
+        <div id="seasonConfigSection" class="config-stack">
+          <div class="field-grid">
+            <div class="field-item" style="width: 72px; flex: none;">
+              <label for="seasonNum" class="field-label">Season</label>
+              <input id="seasonNum" class="field-input text-center" type="number" min="1" placeholder="1">
+            </div>
+            <div class="field-item">
+              <label for="prefix" class="field-label">Show Title</label>
+              <input id="prefix" class="field-input" type="text" placeholder="e.g. My Favorite Show">
+            </div>
+          </div>
+          <div class="field-group" id="seasonNamingRow">
+            <span class="field-label">File Naming</span>
+            <div class="seg-group seg-group-full" id="seasonNamingGroup">
+              <button type="button" class="seg-opt season-naming-opt active" data-season-naming="numbered">Numbered (Clean)</button>
+              <button type="button" class="seg-opt season-naming-opt" data-season-naming="original">Video Title</button>
+            </div>
+            <div class="preview-box" id="seasonNamingPreview"></div>
+          </div>
+          <div class="dest-badge" id="seasonDestRow">
+            <svg class="dest-icon" viewBox="0 0 24 24">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span class="dest-path" id="seasonDestText">Downloads/Subtitles/</span>
+          </div>
+        </div>
+
+        <!-- Progress / Completion Box (Only shown during or after download) -->
+        <div class="state-box" id="seasonStateBox">
+          <div class="state-top">
+            <span id="seasonCountText">Downloading...</span>
+            <span id="seasonPctText">0%</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" id="seasonBarFill"></div>
+          </div>
+          <div class="state-sub" id="statusMessage"></div>
+          <div class="missing-banner" id="seasonMissing"></div>
+        </div>
+
+        <div class="actions">
+          <button class="primary-btn" id="btnStart">Download Season</button>
+          <button class="secondary-btn" id="btnSkipEpisode" style="display:none;" title="Skip waiting on this video and move to the next episode">⏭️ Skip to Next Episode</button>
+          <button class="secondary-btn" id="btnReset" style="display:none;">Start Over</button>
+          <button class="secondary-btn" id="btnSwitchToGeneric" style="display:none;">Switch to Current Video Subtitle</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 3: Universal Subtitle Stream (All OTT & Video Sites) -->
+    <div class="site-view" id="view-generic">
+      <div class="card">
+        <div class="media-header">
+          <div class="media-meta">
+            <div class="pill-tag" id="genPill">WAITING FOR SUBTITLES</div>
+            <div class="media-title" id="genPageTitle">Current Video</div>
+          </div>
+          <button class="icon-btn" id="btnGenericRefresh" title="Scan page for subtitles" aria-label="Scan page for subtitles">
+            <svg viewBox="0 0 24 24">
+              <path d="M21 12a9 9 0 1 1-2.64-6.36"></path>
+              <polyline points="21 3 21 9 15 9"></polyline>
+            </svg>
+          </button>
+        </div>
+
+        <div class="dest-badge" id="genDestRow" style="display:none; margin-top: 12px;">
+          <svg class="dest-icon" viewBox="0 0 24 24">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <span class="dest-path" id="genDestText">Subtitles/</span>
+        </div>
+
+        <div class="actions" id="genPrimaryActions" style="display:none;">
+          <button class="primary-btn" id="btnGenBest">Download Subtitle (.MD)</button>
+          <button class="secondary-btn" id="btnGenCopy">Copy Transcript to Clipboard</button>
+        </div>
+
+        <div id="genericList" class="state-sub" style="margin-top: 12px;"></div>
+
+        <div class="actions" id="genSeasonSwitchWrap" style="display:none;">
+          <button class="secondary-btn" id="btnSwitchToSeason">Batch Download Full Season</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings View (Toggled via Settings button) -->
+  <div class="settings-panel card" id="settingsView">
+    <div class="media-header settings-sticky-header">
+      <div class="media-meta">
+        <div class="pill-tag" style="color:var(--primary)">PREFERENCES</div>
+        <div class="media-title">Settings</div>
+      </div>
+      <button class="btn-done" id="btnCloseSettings">Done</button>
+    </div>
+
+    <div class="settings-scroll-body">
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">File Format</div>
+        <div class="setting-sub" id="formatSub">Markdown (.md) — Clean formatted notes for reading, Notion, and AI</div>
+      </div>
+      <div class="seg-group">
+        <button class="seg-opt format-opt active" data-format-val="md">MD</button>
+        <button class="seg-opt format-opt" data-format-val="txt">TXT</button>
+        <button class="seg-opt format-opt" data-format-val="srt">SRT</button>
+        <button class="seg-opt format-opt" data-format-val="vtt">VTT</button>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Always Ask Where to Save</div>
+        <div class="setting-sub" id="saveAsSub">OFF — Saves directly into Downloads folder without asking</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="setSaveAs">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="setting-row" id="rowDownloadFolder">
+      <div>
+        <div class="setting-label">Downloads Subfolder</div>
+        <div class="setting-sub" id="folderSub">Saves inside Downloads/Subtitles/ automatically</div>
+      </div>
+      <input id="setDownloadFolder" class="compact-input" type="text" value="Subtitles" placeholder="Subtitles" style="width:112px;">
+    </div>
+
+
+    <div class="setting-row" id="rowTimestamps">
+      <div>
+        <div class="setting-label">Timestamps</div>
+        <div class="setting-sub" id="timestampsSub">ON — Shows [00:01:23] timecodes before each line</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="setTimestamps" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="setting-row" id="rowHeader">
+      <div>
+        <div class="setting-label">Title &amp; Source Header</div>
+        <div class="setting-sub" id="headerSub">ON — Adds video title and link at the top of file</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="setHeader" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="setting-row" id="rowStripSounds">
+      <div>
+        <div class="setting-label">Clean Sound Descriptions</div>
+        <div class="setting-sub" id="stripSoundsSub">OFF — Keeps sound tags like [Music], [Applause] in text</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="setStripSounds">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Batch Summary File</div>
+        <div class="setting-sub" id="reportSub">ON — Creates a _Download_Report.md checklist after batch runs</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="setReport" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">On-Screen Progress Bar</div>
+        <div class="setting-sub" id="hudSub">ON — Shows floating progress bar on the video page</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="setHud" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Appearance</div>
+        <div class="setting-sub">Choose dark or light theme</div>
+      </div>
+      <div class="seg-group">
+        <button class="seg-opt theme-opt active" data-theme-val="dark">Dark</button>
+        <button class="seg-opt theme-opt" data-theme-val="light">Light</button>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Subtitle Language</div>
+        <div class="setting-sub" id="langSettingSub">Select which language captions to download</div>
+      </div>
+      <select id="setLang" class="compact-select" aria-label="Subtitle Language">
+        <option value="en">Auto-detect (English)</option>
+      </select>
+    </div>
+    </div>
+  </div>
+
+  <script src="src/core/config.js"></script>
+  <script src="src/popup/popup.js"></script>
+</body>
+</html>

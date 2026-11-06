@@ -1,0 +1,29 @@
+{
+  "name": "subtitle_downloader",
+  "version": "1.0.0",
+  "description": "<div align=\"center\">   <img src=\"icon.png\" alt=\"Subtitle Downloader Logo\" width=\"96\" height=\"96\" />   <h1>Subtitle Downloader</h1>   <p><strong>One-click browser extension to extract, format, and batch-download closed captions, subtitles, and clean readable transcripts from web videos, playlists, and episodic series.</strong></p>   <h3>     <a href=\"https://github.com/sandeepisconscious-create/Subtitle-Downloader/raw/main/Subtitle_Downloader.zip\">⬇️ Click Here to Download Subtitle Downloader (.zip)</a>   </h3>   <p>     <a href=\"https://github.com/sandeepisconscious-create/Subtitle-Downloader/raw/main/Subtitle_Downloader.zip\">       <img src=\"https://img.shields.io/badge/Download-Subtitle__Downloader.zip-2563eb?style=for-the-badge&logo=googlechrome&logoColor=white\" alt=\"Download Latest Release\" />     </a>     <a href=\"https://github.com/sandeepisconscious-create/Subtitle-Downloader/releases/latest\">       <img src=\"https://img.shields.io/github/v/release/sandeepisconscious-create/Subtitle-Downloader?style=for-the-badge&label=Release&color=10b981\" alt=\"Latest Release\" />     </a>   </p> </div>",
+  "main": "index.js",
+  "bin": {
+    "subtitle-downloader": "./bin/cli.js"
+  },
+  "scripts": {
+    "extract": "node bin/cli.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sandeepisconscious-create/Subtitle-Downloader.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/sandeepisconscious-create/Subtitle-Downloader/issues"
+  },
+  "homepage": "https://github.com/sandeepisconscious-create/Subtitle-Downloader#readme",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.4",
+    "tailwindcss": "^4.3.4"
+  }
+}
